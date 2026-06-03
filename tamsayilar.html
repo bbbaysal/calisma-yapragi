@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dinamik Matematik Çalışma Yaprağı Üretici Pro</title>
-    <!-- PDF Oluşturma Kütüphanesi -->
-<script src="https://cloudflare.com"></script>
+    <title>Tam Sayılarda İşlemler - Çalışma Yaprağı</title>
+    
+    <!-- 📚 PDF Oluşturma Kütüphanesi (html2pdf) -->
+    <script src="https://cloudflare.com"></script>
 
     <style>
         /* Genel Arayüz Tasarımı */
@@ -20,19 +21,17 @@
         .control-group label { font-weight: bold; display: block; margin-bottom: 5px; font-size: 14px; }
         select, input { padding: 8px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 14px; }
         button { 
-            padding: 10px 20px; font-size: 14px; font-weight: bold; cursor: pointer; 
+            padding: 10px 15px; font-size: 14px; font-weight: bold; cursor: pointer; 
             border: none; border-radius: 5px; transition: background 0.2s; margin-top: 15px;
         }
         .btn-generate { background: #3b82f6; color: white; }
         .btn-generate:hover { background: #2563eb; }
         .btn-print { background: #22c55e; color: white; margin-left: 10px; }
         .btn-print:hover { background: #16a34a; }
-
-        <!-- Mevcut butonların yanına ekleyin -->
-<a href="index.html" style="text-decoration: none;">
-    <button type="button" style="background: #64748b; margin-left: 10px;">🏠 Ana Sayfaya Dön</button>
-</a>
-
+        .btn-pdf { background: #e11d48; color: white; margin-left: 10px; }
+        .btn-pdf:hover { background: #be123c; }
+        .btn-home { background: #64748b; color: white; margin-left: 10px; text-decoration: none; }
+        .btn-home:hover { background: #475569; }
         
         /* Çalışma Yaprağı Tasarımı */
         .worksheet-header { text-align: center; margin-bottom: 30px; border-bottom: 3px double #333; padding-bottom: 15px; }
@@ -57,7 +56,7 @@
 
     <!-- ÖĞRETMEN PANELİ (Yazdırırken Gizlenir) -->
     <div class="no-print">
-        <h2>🛠️ Çalışma Yaprağı Geliştirme Paneli</h2>
+        <h2>🛠️ Tam Sayılar Çalışma Yaprağı Paneli</h2>
         
         <div class="control-group">
             <label for="topicSelect">🎯 Konu Seçimi:</label>
@@ -86,36 +85,37 @@
 
         <br>
         <button class="btn-generate" onclick="calismaYapragiUret()">🔄 Soruları Yeniden Üret</button>
-        <button class="btn-print" onclick="window.print()">🖨️ Yazdır</button>
-        <!-- Buton Alanına Eklenecek Yeni Buton -->
-<button onclick="pdfIndir()" style="background: #e11d48;">📥 Doğrudan PDF İndir</button>
-     <a href="index.html" style="text-decoration: none;"><button type="button" style="background: #64748b; margin-top:0;">🏠 Ana Sayfaya Dön</button></a>
-
+        <button class="btn-print" onclick="window.print()">🖨️ Tarayıcıdan Yazdır</button>
+        <button class="btn-pdf" onclick="pdfIndir()">📥 Doğrudan PDF İndir</button>
+        <a href="index.html" class="btn-home"><button type="button" style="background: #64748b; margin-top:0; color:white;">🏠 Ana Sayfaya Dön</button></a>
     </div>
 
-    <!-- ÖĞRENCİ ÇALIŞMA YAPRAĞI ALANI -->
-    <div id="worksheet">
-        <div class="worksheet-header">
-            <h2 id="worksheetTitle">TAM SAYILARDA DÖRT İŞLEM ÇALIŞMA YAPRAĞI</h2>
-        </div>
+    <!-- 📄 İNDİRİLECEK VE YAZDIRILACAK ALAN (PDF bu kapsayıcıyı baz alır) -->
+    <div id="downloadWrapper">
         
-        <div class="student-info">
-            <div>Adı Soyadı: ...................................................</div>
-            <div>Sınıfı / No: ....................</div>
-            <div>Tarih: .... / .... / 20...</div>
+        <!-- ÖĞRENCİ ÇALIŞMA YAPRAĞI ALANI -->
+        <div id="worksheet">
+            <div class="worksheet-header">
+                <h2 id="worksheetTitle">TAM SAYILARDA DÖRT İŞLEM ÇALIŞMA YAPRAĞI</h2>
+            </div>
+            
+            <div class="student-info">
+                <div>Adı Soyadı: ...................................................</div>
+                <div>Sınıfı / No: ....................</div>
+                <div>Tarih: .... / .... / 20...</div>
+            </div>
+
+            <div class="questions-grid" id="questionsContainer"></div>
         </div>
 
-        <!-- Sorular buraya enjekte edilecek -->
-        <div class="questions-grid" id="questionsContainer"></div>
-    </div>
-
-    <!-- CEVAP ANAHTARI ALANI (Yazdırma esnasında otomatik yeni sayfaya geçer) -->
-    <div class="answer-key-section">
-        <div class="worksheet-header" style="border-bottom: 2px solid #333;">
-            <h2>🔑 CEVAP ANAHTARI</h2>
+        <!-- CEVAP ANAHTARI ALANI -->
+        <div class="answer-key-section">
+            <div class="worksheet-header" style="border-bottom: 2px solid #333;">
+                <h2>🔑 CEVAP ANAHTARI</h2>
+            </div>
+            <div class="answer-grid" id="answersContainer"></div>
         </div>
-        <!-- Cevaplar buraya enjekte edilecek -->
-        <div class="answer-grid" id="answersContainer"></div>
+
     </div>
 
     <script>
@@ -123,7 +123,6 @@
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
-        // Bölme işleminde kalansız ve sıfırsız tam sayı üretimi
         function uygunBolmeUret(min, max) {
             let bolen = rastgeleSayi(min, max);
             while (bolen === 0 || bolen === 1 || bolen === -1) { 
@@ -131,7 +130,6 @@
             }
             let bolum = rastgeleSayi(min, max);
             while (bolum === 0) { bolum = rastgeleSayi(min, max); }
-            
             let bolunen = bolen * bolum;
             return { sayi1: bolunen, sayi2: bolen, sonuc: bolum };
         }
@@ -143,14 +141,12 @@
             const topic = document.getElementById("topicSelect").value;
             const difficulty = document.getElementById("difficultySelect").value;
             
-            // Başlığı konuya göre güncelleme
             const titleElement = document.getElementById("worksheetTitle");
             titleElement.innerText = topic === 'karisik' ? "TAM SAYILARDA DÖRT İŞLEM ÇALIŞMA YAPRAĞI" : `TAM SAYILARDA ${document.getElementById("topicSelect").options[document.getElementById("topicSelect").selectedIndex].text.toUpperCase()}`;
 
             qContainer.innerHTML = "";
             aContainer.innerHTML = "";
 
-            // Zorluk seviyesine göre sayı aralıkları belirleme
             let min, max;
             if (difficulty === "kolay") { min = 1; max = 9; } 
             else if (difficulty === "orta") { min = -20; max = 20; } 
@@ -162,9 +158,7 @@
                 let islem = topic === "karisik" ? islemler[Math.floor(Math.random() * islemler.length)] : topic;
                 let s1, s2, sonuc;
 
-                // Zorluk seviyesi 'kolay' ise ama çıkarma/toplama geldiyse negatif çıkmaması için ufak güvenlikler (isteğe bağlı)
                 if (islem === '÷') {
-                    // Kolay modda bölme aralığını daraltalım ki devasa sayılar çıkmasın
                     let bMin = difficulty === "kolay" ? 2 : (difficulty === "orta" ? -10 : -25);
                     let bMax = difficulty === "kolay" ? 8 : (difficulty === "orta" ? 10 : 25);
                     let bolme = uygunBolmeUret(bMin, bMax);
@@ -175,7 +169,6 @@
                     s1 = rastgeleSayi(min, max);
                     s2 = rastgeleSayi(min, max);
                     
-                    // Kolay modda negatif sonuç çıkmasını önleme hamlesi
                     if(difficulty === "kolay" && islem === '-' && s1 < s2) {
                         let temp = s1; s1 = s2; s2 = temp;
                     }
@@ -185,21 +178,15 @@
                     if (islem === '×') sonuc = s1 * s2;
                 }
 
-                // Matematiksel yazım kuralları (Negatif sayıları paranteze alma)
                 let s1Yazi = (s1 < 0) ? `(${s1})` : `${s1}`;
-                let s2Yazi = (s2 < 0 && islem !== ' ') ? `(${s2})` : `${s2}`;
+                let s2Yazi = (s2 < 0) ? `(${s2})` : `${s2}`;
                 
-                // İlk sayı negatifse ve işlemin başındaysa bazen parantezsiz de yazılabilir, 
-                // ancak ikinci sayı işlemden sonra geliyorsa kesinlikle parantezli olmalıdır.
-
-                // Soru şablonunu HTML olarak ekle
                 qContainer.innerHTML += `
                     <div class="question-item">
                         <strong>${i})</strong> ${s1Yazi} ${islem} ${s2Yazi} = 
                     </div>
                 `;
 
-                // Cevap anahtarı şablonunu HTML olarak ekle
                 aContainer.innerHTML += `
                     <div class="answer-item">
                         <strong>Soru ${i}:</strong> ${sonuc}
@@ -208,27 +195,20 @@
             }
         }
 
-        // Sayfa ilk yüklendiğinde çalıştır
+        // 📥 DOĞRUDAN PDF İNDİRME FONKSİYONU
+        function pdfIndir() {
+            const element = document.getElementById('downloadWrapper');
+            const ayarlar = {
+                margin:       15,
+                filename:     'tam_sayilar_calisma_yapragi.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(ayarlar).from(element).save();
+        }
+
         window.onload = calismaYapragiUret;
-    
-// JavaScript kısmının en altına eklenecek fonksiyon
-function pdfIndir() {
-    // PDF yapılmasını istediğimiz alanı seçiyoruz (Öğretmen paneli hariç)
-    const element = document.getElementById('worksheet');
-    
-    // PDF ayarları
-    const ayarlar = {
-        margin:       10,
-        filename:     'matematik_calisma_yapragi.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2 }, // Çözünürlük kalitesi (2 idealdir)
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    // İndirme işlemini başlat
-    html2pdf().set(ayarlar).from(element).save();
-}
-
     </script>
 </body>
 </html>
