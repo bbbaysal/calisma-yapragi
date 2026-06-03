@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tam Sayılarda İşlemler - Çalışma Yaprağı</title>
-    
-    <!-- 📚 PDF Oluşturma Kütüphanesi (html2pdf) -->
-    <script src="https://cloudflare.com"></script>
-
     <style>
         /* Genel Arayüz Tasarımı */
         body { font-family: 'Segoe UI', Arial, sans-serif; margin: 30px; color: #333; line-height: 1.5; }
@@ -20,17 +16,17 @@
         .control-group { display: inline-block; margin-right: 20px; margin-bottom: 10px; }
         .control-group label { font-weight: bold; display: block; margin-bottom: 5px; font-size: 14px; }
         select, input { padding: 8px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 14px; }
+        
+        /* Buton Tasarımları */
         button { 
-            padding: 10px 15px; font-size: 14px; font-weight: bold; cursor: pointer; 
+            padding: 10px 18px; font-size: 14px; font-weight: bold; cursor: pointer; 
             border: none; border-radius: 5px; transition: background 0.2s; margin-top: 15px;
         }
         .btn-generate { background: #3b82f6; color: white; }
         .btn-generate:hover { background: #2563eb; }
         .btn-print { background: #22c55e; color: white; margin-left: 10px; }
         .btn-print:hover { background: #16a34a; }
-        .btn-pdf { background: #e11d48; color: white; margin-left: 10px; }
-        .btn-pdf:hover { background: #be123c; }
-        .btn-home { background: #64748b; color: white; margin-left: 10px; text-decoration: none; }
+        .btn-home { background: #64748b; color: white; margin-left: 10px; text-decoration: none; display: inline-block; }
         .btn-home:hover { background: #475569; }
         
         /* Çalışma Yaprağı Tasarımı */
@@ -44,17 +40,17 @@
         .answer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 20px; }
         .answer-item { font-size: 16px; padding: 8px; background: #f1f5f9; border-radius: 4px; border-left: 4px solid #3b82f6; }
 
-        /* 🖨️ YAZDIRMA AYARLARI */
+        /* 🖨️ SİHİRLİ YAZDIRMA VE PDF AYARLARI */
         @media print {
-            .no-print { display: none !important; }
-            body { margin: 0; padding: 0; }
+            .no-print { display: none !important; } /* Paneli tamamen gizler */
+            body { margin: 0; padding: 0; background: white; }
             .answer-item { background: none !important; border: 1px solid #cbd5e1; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ÖĞRETMEN PANELİ (Yazdırırken Gizlenir) -->
+    <!-- ÖĞRETMEN PANELİ (Yazdırırken otomatik gizlenir) -->
     <div class="no-print">
         <h2>🛠️ Tam Sayılar Çalışma Yaprağı Paneli</h2>
         
@@ -85,37 +81,34 @@
 
         <br>
         <button class="btn-generate" onclick="calismaYapragiUret()">🔄 Soruları Yeniden Üret</button>
-        <button class="btn-print" onclick="window.print()">🖨️ Tarayıcıdan Yazdır</button>
-        <button class="btn-pdf" onclick="pdfIndir()">📥 Doğrudan PDF İndir</button>
-        <a href="index.html" class="btn-home"><button type="button" style="background: #64748b; margin-top:0; color:white;">🏠 Ana Sayfaya Dön</button></a>
+        
+        <!-- Bu buton hem fiziksel yazıcıyı açar hem de açılan ekranda "PDF olarak kaydet" seçeneği sunar -->
+        <button class="btn-print" onclick="window.print()">🖨️ Yazdır / PDF Olarak Kaydet</button>
+        
+        <a href="index.html" class="btn-home"><button type="button" style="background: #64748b; margin: 0; color: white;">🏠 Ana Sayfaya Dön</button></a>
     </div>
 
-    <!-- 📄 İNDİRİLECEK VE YAZDIRILACAK ALAN (PDF bu kapsayıcıyı baz alır) -->
-    <div id="downloadWrapper">
+    <!-- ÖĞRENCİ ÇALIŞMA YAPRAĞI ALANI -->
+    <div id="worksheet">
+        <div class="worksheet-header">
+            <h2 id="worksheetTitle">TAM SAYILARDA DÖRT İŞLEM ÇALIŞMA YAPRAĞI</h2>
+        </div>
         
-        <!-- ÖĞRENCİ ÇALIŞMA YAPRAĞI ALANI -->
-        <div id="worksheet">
-            <div class="worksheet-header">
-                <h2 id="worksheetTitle">TAM SAYILARDA DÖRT İŞLEM ÇALIŞMA YAPRAĞI</h2>
-            </div>
-            
-            <div class="student-info">
-                <div>Adı Soyadı: ...................................................</div>
-                <div>Sınıfı / No: ....................</div>
-                <div>Tarih: .... / .... / 20...</div>
-            </div>
-
-            <div class="questions-grid" id="questionsContainer"></div>
+        <div class="student-info">
+            <div>Adı Soyadı: ...................................................</div>
+            <div>Sınıfı / No: ....................</div>
+            <div>Tarih: .... / .... / 20...</div>
         </div>
 
-        <!-- CEVAP ANAHTARI ALANI -->
-        <div class="answer-key-section">
-            <div class="worksheet-header" style="border-bottom: 2px solid #333;">
-                <h2>🔑 CEVAP ANAHTARI</h2>
-            </div>
-            <div class="answer-grid" id="answersContainer"></div>
-        </div>
+        <div class="questions-grid" id="questionsContainer"></div>
+    </div>
 
+    <!-- CEVAP ANAHTARI ALANI -->
+    <div class="answer-key-section">
+        <div class="worksheet-header" style="border-bottom: 2px solid #333;">
+            <h2>🔑 CEVAP ANAHTARI</h2>
+        </div>
+        <div class="answer-grid" id="answersContainer"></div>
     </div>
 
     <script>
@@ -193,19 +186,6 @@
                     </div>
                 `;
             }
-        }
-
-        // 📥 DOĞRUDAN PDF İNDİRME FONKSİYONU
-        function pdfIndir() {
-            const element = document.getElementById('downloadWrapper');
-            const ayarlar = {
-                margin:       15,
-                filename:     'tam_sayilar_calisma_yapragi.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-            html2pdf().set(ayarlar).from(element).save();
         }
 
         window.onload = calismaYapragiUret;
