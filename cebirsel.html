@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cebirsel İfadeler ve Denklemler - Çalışma Yaprağı</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 30px; color: #333; line-height: 1.5; }
+        
+        /* Öğretmen Kontrol Paneli */
+        .no-print { 
+            background: #f8f9fa; padding: 20px; border: 1px solid #e2e8f0; 
+            border-radius: 10px; margin-bottom: 30px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .control-group { display: inline-block; margin-right: 20px; margin-bottom: 10px; }
+        .control-group label { font-weight: bold; display: block; margin-bottom: 5px; font-size: 14px; }
+        select, input { padding: 8px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 14px; }
+        
+        /* Butonlar */
+        button { 
+            padding: 10px 18px; font-size: 14px; font-weight: bold; cursor: pointer; 
+            border: none; border-radius: 5px; transition: background 0.2s; margin-top: 15px;
+        }
+        .btn-generate { background: #3b82f6; color: white; }
+        .btn-generate:hover { background: #2563eb; }
+        .btn-print { background: #22c55e; color: white; margin-left: 10px; }
+        .btn-print:hover { background: #16a34a; }
+        
+        /* Çalışma Yaprağı Düzeni */
+        .worksheet-header { text-align: center; margin-bottom: 30px; border-bottom: 3px double #333; padding-bottom: 15px; }
+        .student-info { display: flex; justify-content: space-between; margin-bottom: 30px; font-weight: bold; font-size: 15px; }
+        .questions-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 45px 60px; }
+        .question-item { font-size: 20px; padding-bottom: 20px; border-bottom: 1px dashed #cbd5e1; page-break-inside: avoid; }
+        .space-for-solution { margin-top: 15px; height: 40px; } /* Öğrencinin çözüm yapması için boşluk */
+        
+        /* Cevap Anahtarı */
+        .answer-key-section { page-break-before: always; margin-top: 50px; padding-top: 20px; }
+        .answer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 20px; }
+        .answer-item { font-size: 16px; padding: 8px; background: #f1f5f9; border-radius: 4px; border-left: 4px solid #3b82f6; }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { margin: 0; padding: 0; background: white; }
+            .answer-item { background: none !important; border: 1px solid #cbd5e1; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ÖĞRETMEN PANELİ -->
+    <div class="no-print">
+        <h2>🛠️ Cebirsel İfadeler ve Denklemler Paneli</h2>
+        
+        <div class="control-group">
+            <label for="topicSelect">🎯 Soru Tipi:</label>
+            <select id="topicSelect" onchange="calismaYapragiUret()">
+                <option value="karisik">Karışık Soru Tipleri</option>
+                <option value="ax+b=c">ax + b = c Tipi Denklemler</option>
+                <option value="ax-b=c">ax - b = c Tipi Denklemler</option>
+                <option value="ax+b=cx+d">İki Tarafta Bilinmeyenli Denklemler</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="difficultySelect">⚡ Zorluk Seviyesi:</label>
+            <select id="difficultySelect" onchange="calismaYapragiUret()">
+                <option value="kolay">Kolay (Sadece pozitif katsayılar ve sonuçlar)</option>
+                <option value="orta" selected>Orta (Negatif katsayılar ve sonuçlar dahil)</option>
+                <option value="zor">Zor (Büyük katsayılar ve parantezli işlemler)</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="questionCount">📝 Soru Sayısı:</label>
+            <input type="number" id="questionCount" value="20" min="4" max="100" step="2" style="width: 60px;">
+        </div>
+
+        <br>
+        <button class="btn-generate" onclick="calismaYapragiUret()">🔄 Soruları Yeniden Üret</button>
+        <button class="btn-print" onclick="window.print()">🖨️ Yazdır / PDF Olarak Kaydet</button>
+        <a href="index.html" style="text-decoration: none;"><button type="button" style="background: #64748b; margin-top:0; color:white; cursor:pointer;">🏠 Ana Sayfaya Dön</button></a>
+    </div>
+
+    <!-- ÇALIŞMA YAPRAĞI -->
+    <div id="worksheet">
+        <div class="worksheet-header">
+            <h2 id="worksheetTitle">CEBİRSEL İFADELER VE DENKLEMLER ÇALIŞMA YAPRAĞI</h2>
+        </div>
+        
+        <div class="student-info">
+            <div>Adı Soyadı: ...................................................</div>
+            <div>Sınıfı / No: ....................</div>
+            <div>Tarih: .... / .... / 20...</div>
+        </div>
+
+        <div class="questions-grid" id="questionsContainer"></div>
+    </div>
+
+    <!-- CEVAP ANAHTARI -->
+    <div class="answer-key-section">
+        <div class="worksheet-header" style="border-bottom: 2px solid #333;">
+            <h2>🔑 CEVAP ANAHTARI</h2>
+        </div>
+        <div class="answer-grid" id="answersContainer"></div>
+    </div>
+
+    <!-- Matematik Motoru Dış Bağlantısı -->
+    <script src="cebirsel-motoru.js"></script>
+</body>
+</html>
