@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dinamik Matematik Çalışma Yaprağı Üretici Pro</title>
+    <!-- PDF Oluşturma Kütüphanesi -->
+<script src="https://cloudflare.com"></script>
+
     <style>
         /* Genel Arayüz Tasarımı */
         body { font-family: 'Segoe UI', Arial, sans-serif; margin: 30px; color: #333; line-height: 1.5; }
@@ -83,7 +86,10 @@
 
         <br>
         <button class="btn-generate" onclick="calismaYapragiUret()">🔄 Soruları Yeniden Üret</button>
-        <button class="btn-print" onclick="window.print()">🖨️ Yazdır / PDF Kaydet</button>
+        <button class="btn-print" onclick="window.print()">🖨️ Yazdır</button>
+        <!-- Buton Alanına Eklenecek Yeni Buton -->
+<button onclick="pdfIndir()" style="background: #e11d48;">📥 Doğrudan PDF İndir</button
+
     </div>
 
     <!-- ÖĞRENCİ ÇALIŞMA YAPRAĞI ALANI -->
@@ -203,6 +209,25 @@
 
         // Sayfa ilk yüklendiğinde çalıştır
         window.onload = calismaYapragiUret;
+    
+// JavaScript kısmının en altına eklenecek fonksiyon
+function pdfIndir() {
+    // PDF yapılmasını istediğimiz alanı seçiyoruz (Öğretmen paneli hariç)
+    const element = document.getElementById('worksheet');
+    
+    // PDF ayarları
+    const ayarlar = {
+        margin:       10,
+        filename:     'matematik_calisma_yapragi.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 }, // Çözünürlük kalitesi (2 idealdir)
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    // İndirme işlemini başlat
+    html2pdf().set(ayarlar).from(element).save();
+}
+
     </script>
 </body>
 </html>
