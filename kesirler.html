@@ -4,33 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kesirli Sayılarda İşlemler - Çalışma Yaprağı</title>
-    
-    <!-- 📚 MathJax Matematiksel Formül Kütüphanesi -->
-    <script>
-        window.MathJax = {
-            tex: { inlineMath: [['$', '$']] },
-            startup: { ready: () => { MathJax.startup.defaultReady(); calismaYapragiUret(); } }
-        };
-    </script>
-    <script id="MathJax-script" async src="https://jsdelivr.net"></script>
-
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 30px; color: #333; line-height: 1.5; }
+        /* Genel Arayüz Tasarımı */
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 30px; color: #333; line-height: 1.5; background: #fff; }
         .no-print { background: #f8f9fa; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 30px; }
         .control-group { display: inline-block; margin-right: 20px; margin-bottom: 10px; }
         .control-group label { font-weight: bold; display: block; margin-bottom: 5px; font-size: 14px; }
         select, input { padding: 8px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 14px; }
-        button { padding: 10px 20px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; border-radius: 5px; margin-top: 15px; }
+        
+        button { padding: 10px 18px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; border-radius: 5px; transition: background 0.2s; margin-top: 15px; }
         .btn-generate { background: #3b82f6; color: white; }
+        .btn-generate:hover { background: #2563eb; }
         .btn-print { background: #22c55e; color: white; margin-left: 10px; }
+        .btn-print:hover { background: #16a34a; }
+        .btn-home { background: #64748b; color: white; margin-left: 10px; text-decoration: none; display: inline-block; }
+        
         .worksheet-header { text-align: center; margin-bottom: 30px; border-bottom: 3px double #333; padding-bottom: 15px; }
         .student-info { display: flex; justify-content: space-between; margin-bottom: 30px; font-weight: bold; font-size: 15px; }
-        .questions-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 50px 60px; }
-        .question-item { display: flex; align-items: center; font-size: 22px; page-break-inside: avoid; padding-bottom: 20px; border-bottom: 1px dashed #cbd5e1; }
+        
+        /* 📐 ÖZEL KESİR VE MATEMATİKSEL HİZALAMA CSS ALANI */
+        .questions-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px 60px; }
+        .question-item { display: flex; align-items: center; font-size: 22px; page-break-inside: avoid; padding-bottom: 15px; border-bottom: 1px dashed #cbd5e1; }
+        
+        /* Kesirlerin ana kutusu (Her şeyi tam dikey ortalar) */
+        .math-expr { display: inline-flex; align-items: center; font-size: 22px; font-family: 'Times New Roman', Times, serif; font-style: italic; }
+        
+        /* Kesir Çizgisi ve Alt Üst Dizilimi */
+        .fraction { display: inline-flex; flex-direction: column; text-align: center; vertical-align: middle; padding: 0 6px; position: relative; }
+        .numerator { border-bottom: 2px solid #333; padding-bottom: 2px; font-size: 20px; line-height: 1; }
+        .denominator { padding-top: 2px; font-size: 20px; line-height: 1; }
+        
+        /* İşlem Sembolleri Hizalaması (Artı, Eksi, Çarpı, Bölü) */
+        .op { padding: 0 12px; font-size: 24px; font-weight: bold; font-style: normal; display: inline-block; }
+        .minus-sign { font-size: 24px; font-style: normal; padding-right: 2px; display: inline-block; }
+        
+        /* Cevap Anahtarı Tasarımı */
         .answer-key-section { page-break-before: always; margin-top: 50px; padding-top: 20px; }
-        .answer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 20px; }
-        .answer-item { display: flex; align-items: center; font-size: 18px; padding: 10px; background: #f1f5f9; border-radius: 4px; border-left: 4px solid #3b82f6; }
-        @media print { .no-print { display: none !important; } body { margin: 0; padding: 0; background: white; } .answer-item { background: none !important; border: 1px solid #cbd5e1; } }
+        .answer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 20px; }
+        .answer-item { display: flex; align-items: center; font-size: 18px; padding: 8px; background: #f1f5f9; border-radius: 4px; border-left: 4px solid #3b82f6; }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { margin: 0; padding: 0; background: white; }
+            .answer-item { background: none !important; border: 1px solid #cbd5e1; }
+        }
     </style>
 </head>
 <body>
@@ -51,19 +68,19 @@
         <div class="control-group">
             <label for="difficultySelect">⚡ Zorluk Seviyesi:</label>
             <select id="difficultySelect" onchange="calismaYapragiUret()">
-                <option value="kolay">Kolay (Paydalar eşit/katı)</option>
-                <option value="orta" selected>Orta (Rastgele paydalar)</option>
-                <option value="zor">Zor (Negatifler dahil)</option>
+                <option value="kolay">Kolay (Paydalar eşit veya katı)</option>
+                <option value="orta" selected>Orta (Rastgele paydalar, basit kesirler)</option>
+                <option value="zor">Zor (Bileşik / Negatif kesirler dahil)</option>
             </select>
         </div>
         <div class="control-group">
             <label for="questionCount">📝 Soru Sayısı:</label>
-            <input type="number" id="questionCount" value="20" min="4" max="100" style="width: 60px;">
+            <input type="number" id="questionCount" value="20" min="4" max="100" step="2" style="width: 60px;">
         </div>
         <br>
         <button class="btn-generate" onclick="calismaYapragiUret()">🔄 Soruları Yeniden Üret</button>
         <button class="btn-print" onclick="window.print()">🖨️ Yazdır / PDF Olarak Kaydet</button>
-        <a href="index.html" style="text-decoration: none;"><button type="button" style="background: #64748b; margin-top:0; color:white; cursor:pointer;">🏠 Ana Sayfaya Dön</button></a>
+        <a href="index.html" class="btn-home"><button type="button" style="background: #64748b; margin: 0; color: white; cursor: pointer;">🏠 Ana Sayfaya Dön</button></a>
     </div>
 
     <!-- ÇALIŞMA YAPRAĞI -->
@@ -83,7 +100,118 @@
         <div class="answer-grid" id="answersContainer"></div>
     </div>
 
-    <!-- Matematik Motorunu Çağıran Dış Bağlantı -->
-    <script src="kesir-motoru.js"></script>
+    <!-- İKİNCİ PARÇA ALTTTAKİ SCRIPT ETİKETİNİN İÇİNE GELECEK -->
+    <script>
+        function ebob(a, b) {
+            return b === 0 ? Math.abs(a) : ebob(b, a % b);
+        }
+
+        function rastgeleSayi(min, max) {
+            let sayi = Math.floor(Math.random() * (max - min + 1)) + min;
+            return sayi === 0 ? rastgeleSayi(min, max) : sayi;
+        }
+
+        function Kesir(pay, payda) {
+            if (payda === 0) payda = 1;
+            let ortakBolen = ebob(pay, payda);
+            this.pay = pay / ortakBolen;
+            this.payda = payda / ortakBolen;
+            
+            if (this.payda < 0) {
+                this.pay = -this.pay;
+                this.payda = -this.payda;
+            }
+        }
+
+        function kesirYaz(kesir) {
+            if (kesir.payda === 1) {
+                return `${kesir.pay}`;
+            }
+            
+            let isaretHTML = kesir.pay < 0 ? '<span class="minus-sign">-</span>' : '';
+            let mutlakPay = Math.abs(kesir.pay);
+            
+            return `
+                <div class="math-expr">
+                    ${isaretHTML}
+                    <div class="fraction">
+                        <div class="numerator">${mutlakPay}</div>
+                        <div class="denominator">${kesir.payda}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function calismaYapragiUret() {
+            const qContainer = document.getElementById("questionsContainer");
+            const aContainer = document.getElementById("answersContainer");
+            const count = parseInt(document.getElementById("questionCount").value);
+            const topic = document.getElementById("topicSelect").value;
+            const difficulty = document.getElementById("difficultySelect").value;
+            
+            qContainer.innerHTML = "";
+            aContainer.innerHTML = "";
+
+            const islemler = ['+', '-', '×', '÷'];
+
+            for (let i = 1; i <= count; i++) {
+                let islem = topic === "karisik" ? islemler[Math.floor(Math.random() * islemler.length)] : topic;
+                let p1, pd1, p2, pd2;
+
+                if (difficulty === "kolay") {
+                    pd1 = rastgeleSayi(2, 8);
+                    pd2 = islem === '+' || islem === '-' ? pd1 : rastgeleSayi(2, 5);
+                    p1 = rastgeleSayi(1, pd1 - 1);
+                    p2 = rastgeleSayi(1, pd2 - 1);
+                } else if (difficulty === "orta") {
+                    pd1 = rastgeleSayi(2, 10);
+                    pd2 = rastgeleSayi(2, 10);
+                    p1 = rastgeleSayi(1, pd1 + 2);
+                    p2 = rastgeleSayi(1, pd2 + 2);
+                } else {
+                    pd1 = rastgeleSayi(2, 15);
+                    pd2 = rastgeleSayi(2, 15);
+                    p1 = rastgeleSayi(-12, 12);
+                    p2 = rastgeleSayi(-12, 12);
+                }
+
+                let k1 = new Kesir(p1, pd1);
+                let k2 = new Kesir(p2, pd2);
+                let kSonuc;
+
+                if (islem === '+') {
+                    kSonuc = new Kesir((k1.pay * k2.payda) + (k2.pay * k1.payda), k1.payda * k2.payda);
+                } else if (islem === '-') {
+                    if(difficulty === "kolay" && (k1.pay/k1.payda < k2.pay/k2.payda)) {
+                        let temp = k1; k1 = k2; k2 = temp;
+                    }
+                    kSonuc = new Kesir((k1.pay * k2.payda) - (k2.pay * k1.payda), k1.payda * k2.payda);
+                } else if (islem === '×') {
+                    kSonuc = new Kesir(k1.pay * k2.pay, k1.payda * k2.payda);
+                } else if (islem === '÷') {
+                    while(k2.pay === 0) { k2 = new Kesir(rastgeleSayi(1, 5), pd2); }
+                    kSonuc = new Kesir(k1.pay * k2.payda, k1.payda * k2.pay);
+                }
+
+                qContainer.innerHTML += `
+                    <div class="question-item">
+                        <span style="font-weight:bold; margin-right:10px;">${i})</span>
+                        ${kesirYaz(k1)}
+                        <span class="op">${islem}</span>
+                        ${kesirYaz(k2)}
+                        <span class="op">=</span>
+                    </div>
+                `;
+
+                aContainer.innerHTML += `
+                    <div class="answer-item">
+                        <strong style="margin-right:8px;">S${i}:</strong> ${kesirYaz(kSonuc)}
+                    </div>
+                `;
+            }
+        }
+
+        window.onload = calismaYapragiUret;
+    </script>
 </body>
 </html>
