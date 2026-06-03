@@ -5,7 +5,7 @@ function ebob(a, b) {
 
 function rastgeleSayi(min, max) {
     let sayi = Math.floor(Math.random() * (max - min + 1)) + min;
-    return sayi === 0 ? rastgeleSayi(min, max) : sayi; // Paydada 0 olmasın
+    return sayi === 0 ? rastgeleSayi(min, max) : sayi;
 }
 
 // Kesir nesnesi oluşturma ve otomatik sadeleştirme
@@ -15,27 +15,22 @@ function Kesir(pay, payda) {
     this.pay = pay / ortakBolen;
     this.payda = payda / ortakBolen;
     
-    // Eksiyi her zaman paya taşıyalım standart olsun
     if (this.payda < 0) {
         this.pay = -this.pay;
         this.payda = -this.payda;
     }
 }
 
-// HTML formatında kesir basma fonksiyonu
+// ✨ LaTeX / MathJax Formatında Kesir Basma Fonksiyonu
 function kesirYaz(kesir) {
-    let isaret = kesir.pay < 0 ? "-" : "";
-    let mutlakPay = Math.abs(kesir.pay);
-    
-    if (kesir.payda === 1) return `${isaret}${mutlakPay}`;
-    
-    return `
-        ${isaret}
-        <div class="fraction">
-            <span class="numerator">${mutlakPay}</span>
-            <span class="denominator">${kesir.payda}</span>
-        </div>
-    `;
+    if (kesir.payda === 1) {
+        return `${kesir.pay}`;
+    }
+    // Negatif kesirlerde eksiyi en öne şık duracak şekilde yerleştirir
+    if (kesir.pay < 0) {
+        return `-\\frac{${Math.abs(kesir.pay)}}{${kesir.payda}}`;
+    }
+    return `\\frac{${kesir.pay}}{${kesir.payda}}`;
 }
 
 function calismaYapragiUret() {
@@ -48,10 +43,15 @@ function calismaYapragiUret() {
     qContainer.innerHTML = "";
     aContainer.innerHTML = "";
 
-    const islemler = ['+', '-', '×', '÷'];
+    const islemler = ['+', '-', '\\cdot', ':']; // Matematiksel çarpma ve bölme sembolleri LaTeX uyumlu yapıldı
 
     for (let i = 1; i <= count; i++) {
         let islem = topic === "karisik" ? islemler[Math.floor(Math.random() * islemler.length)] : topic;
+        
+        // Formül dönüştürmeleri
+        if(islem === '×') islem = '\\cdot';
+        if(islem === '÷') islem = ':';
+
         let p1, pd1, p2, pd2;
 
         if (difficulty === "kolay") {
@@ -82,30 +82,32 @@ function calismaYapragiUret() {
                 let temp = k1; k1 = k2; k2 = temp;
             }
             kSonuc = new Kesir((k1.pay * k2.payda) - (k2.pay * k1.payda), k1.payda * k2.payda);
-        } else if (islem === '×') {
+        } else if (islem === '\\cdot') {
             kSonuc = new Kesir(k1.pay * k2.pay, k1.payda * k2.payda);
-        } else if (islem === '÷') {
+        } else if (islem === ':') {
             while(k2.pay === 0) { k2 = new Kesir(rastgeleSayi(1, 5), pd2); }
             kSonuc = new Kesir(k1.pay * k2.payda, k1.payda * k2.pay);
         }
 
+        // MathJax'ın tetiklenmesi için formüllerin başına ve sonuna $ işareti konuldu
         qContainer.innerHTML += `
             <div class="question-item">
-                <span style="font-weight:bold; margin-right:10px;">${i})</span>
-                ${kesirYaz(k1)}
-                <span class="operation">${islem}</span>
-                ${kesirYaz(k2)}
-                <span class="operation">=</span>
+                <span style="font-weight:bold; margin-right:15px;">${i})</span>
+                $ ${kesirYaz(k1)} ${islem} ${kesirYaz(k2)} = $
             </div>
         `;
 
         aContainer.innerHTML += `
             <div class="answer-item">
-                <strong style="margin-right:8px;">S${i}:</strong> ${kesirYaz(kSonuc)}
+                <strong style="margin-right:8px;">S${i}:</strong> $ ${kesirYaz(kSonuc)} $
             </div>
         `;
     }
+
+    // ✨ Sihirli Satır: Dinamik üretilen LaTeX formüllerini MathJax kütüphanesine taratıp şık kesirlere dönüştürür
+    if (window.MathJax && window.MathJax.typeset) {
+        window.MathJax.typeset();
+    }
 }
 
-// Sayfa ilk açıldığında otomatik üretimi başlatır
 window.onload = calismaYapragiUret;
