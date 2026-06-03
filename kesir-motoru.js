@@ -1,4 +1,3 @@
-// En Büyük Ortak Bölen (EBOB) - Sadeleştirme için
 function ebob(a, b) {
     return b === 0 ? Math.abs(a) : ebob(b, a % b);
 }
@@ -8,7 +7,6 @@ function rastgeleSayi(min, max) {
     return sayi === 0 ? rastgeleSayi(min, max) : sayi;
 }
 
-// Kesir nesnesi oluşturma ve otomatik sadeleştirme
 function Kesir(pay, payda) {
     if (payda === 0) payda = 1;
     let ortakBolen = ebob(pay, payda);
@@ -21,12 +19,10 @@ function Kesir(pay, payda) {
     }
 }
 
-// ✨ LaTeX / MathJax Formatında Kesir Basma Fonksiyonu
 function kesirYaz(kesir) {
     if (kesir.payda === 1) {
         return `${kesir.pay}`;
     }
-    // Negatif kesirlerde eksiyi en öne şık duracak şekilde yerleştirir
     if (kesir.pay < 0) {
         return `-\\frac{${Math.abs(kesir.pay)}}{${kesir.payda}}`;
     }
@@ -36,6 +32,9 @@ function kesirYaz(kesir) {
 function calismaYapragiUret() {
     const qContainer = document.getElementById("questionsContainer");
     const aContainer = document.getElementById("answersContainer");
+    
+    if (!window.MathJax || !window.MathJax.typeset) return;
+
     const count = parseInt(document.getElementById("questionCount").value);
     const topic = document.getElementById("topicSelect").value;
     const difficulty = document.getElementById("difficultySelect").value;
@@ -43,12 +42,11 @@ function calismaYapragiUret() {
     qContainer.innerHTML = "";
     aContainer.innerHTML = "";
 
-    const islemler = ['+', '-', '\\cdot', ':']; // Matematiksel çarpma ve bölme sembolleri LaTeX uyumlu yapıldı
+    const islemler = ['+', '-', '\\cdot', ':'];
 
     for (let i = 1; i <= count; i++) {
         let islem = topic === "karisik" ? islemler[Math.floor(Math.random() * islemler.length)] : topic;
         
-        // Formül dönüştürmeleri
         if(islem === '×') islem = '\\cdot';
         if(islem === '÷') islem = ':';
 
@@ -89,7 +87,6 @@ function calismaYapragiUret() {
             kSonuc = new Kesir(k1.pay * k2.payda, k1.payda * k2.pay);
         }
 
-        // MathJax'ın tetiklenmesi için formüllerin başına ve sonuna $ işareti konuldu
         qContainer.innerHTML += `
             <div class="question-item">
                 <span style="font-weight:bold; margin-right:15px;">${i})</span>
@@ -104,10 +101,5 @@ function calismaYapragiUret() {
         `;
     }
 
-    // ✨ Sihirli Satır: Dinamik üretilen LaTeX formüllerini MathJax kütüphanesine taratıp şık kesirlere dönüştürür
-    if (window.MathJax && window.MathJax.typeset) {
-        window.MathJax.typeset();
-    }
+    window.MathJax.typeset();
 }
-
-window.onload = calismaYapragiUret;
