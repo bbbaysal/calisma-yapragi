@@ -2,81 +2,57 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cebirsel İfadeler ve Denklemler - Çalışma Yaprağı</title>
     <style>
-        /* Genel Arayüz Tasarımı */
-        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 30px; color: #333; line-height: 1.5; background: #fff; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 30px; color: #333; line-height: 1.5; }
         .no-print { background: #f8f9fa; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 30px; }
         .control-group { display: inline-block; margin-right: 20px; margin-bottom: 10px; }
         .control-group label { font-weight: bold; display: block; margin-bottom: 5px; font-size: 14px; }
         select, input { padding: 8px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 14px; }
-        
-        button { padding: 10px 18px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; border-radius: 5px; transition: background 0.2s; margin-top: 15px; }
-        .btn-generate { background: #3b82f6; color: white; }
-        .btn-generate:hover { background: #2563eb; }
-        .btn-print { background: #22c55e; color: white; margin-left: 10px; }
-        .btn-print:hover { background: #16a34a; }
-        .btn-home { background: #64748b; color: white; margin-left: 10px; text-decoration: none; display: inline-block; }
-        
+        button { padding: 10px 18px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; border-radius: 5px; }
         .worksheet-header { text-align: center; margin-bottom: 30px; border-bottom: 3px double #333; padding-bottom: 15px; }
         .student-info { display: flex; justify-content: space-between; margin-bottom: 30px; font-weight: bold; font-size: 15px; }
-        
-        /* 📐 ÖZEL DENKLEM HİZALAMA VE TÜRKÇE KARAKTER STANDARDI CSS ALANI */
         .questions-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px 60px; }
         .question-item { font-size: 18px; padding-bottom: 15px; border-bottom: 1px dashed #cbd5e1; page-break-inside: avoid; }
-        
-        /* Denklem Fontu: Klasik Matematik Kitabı İtalik X Düzeni */
-        .math-equation { display: block; font-family: 'Times New Roman', Times, serif; font-size: 24px; margin: 15px 0; letter-spacing: 0.5px; font-weight: 500; }
-        .math-equation span.variable { font-style: italic; font-weight: bold; color: #1e3a8a; }
-        .space-for-solution { height: 50px; } /* Öğrencinin işlem yapması için temiz boşluk */
-        
-        /* Cevap Anahtarı Tasarımı */
-        .answer-key-section { page-break-before: always; margin-top: 50px; padding-top: 20px; }
+        .math-eq { display: block; font-family: 'Times New Roman', Times, serif; font-size: 24px; margin: 12px 0; font-weight: 500; }
+        .var { font-style: italic; font-weight: bold; color: #1e3a8a; }
+        .space { height: 50px; }
+        .answer-key-section { page-break-before: always; margin-top: 50px; }
         .answer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 20px; }
         .answer-item { font-size: 18px; padding: 8px; background: #f1f5f9; border-radius: 4px; border-left: 4px solid #3b82f6; font-family: 'Times New Roman', Times, serif; }
-        .answer-item span.variable { font-style: italic; font-weight: bold; }
-
-        @media print {
-            .no-print { display: none !important; }
-            body { margin: 0; padding: 0; background: white; }
-            .answer-item { background: none !important; border: 1px solid #cbd5e1; }
-        }
+        @media print { .no-print { display: none !important; } body { margin: 0; } .answer-item { background: none !important; border: 1px solid #cbd5e1; } }
     </style>
 </head>
 <body>
 
-    <!-- ÖĞRETMEN PANELİ -->
     <div class="no-print">
         <h2>🛠️ Cebirsel İfadeler ve Denklemler Paneli</h2>
         <div class="control-group">
-            <label for="topicSelect">🎯 Soru Tipi:</label>
+            <label>🎯 Soru Tipi:</label>
             <select id="topicSelect" onchange="calismaYapragiUret()">
                 <option value="karisik">Karışık Soru Tipleri</option>
-                <option value="ax+b=c">ax + b = c Tipi Denklemler</option>
-                <option value="ax-b=c">ax - b = c Tipi Denklemler</option>
-                <option value="ax+b=cx+d">İki Tarafta Bilinmeyenli Denklemler</option>
+                <option value="ax+b=c">ax + b = c</option>
+                <option value="ax-b=c">ax - b = c</option>
+                <option value="ax+b=cx+d">ax + b = cx + d</option>
             </select>
         </div>
         <div class="control-group">
-            <label for="difficultySelect">⚡ Zorluk Seviyesi:</label>
+            <label>⚡ Zorluk:</label>
             <select id="difficultySelect" onchange="calismaYapragiUret()">
-                <option value="kolay">Kolay (Sadece pozitif katsayılar ve sonuçlar)</option>
-                <option value="orta" selected>Orta (Negatif katsayılar ve sonuçlar dahil)</option>
-                <option value="zor">Zor (Büyük katsayılar)</option>
+                <option value="kolay">Kolay (Sadece Pozitifler)</option>
+                <option value="orta" selected>Orta (Negatifler Dahil)</option>
+                <option value="zor">Zor (Büyük Sayılar)</option>
             </select>
         </div>
         <div class="control-group">
-            <label for="questionCount">📝 Soru Sayısı:</label>
-            <input type="number" id="questionCount" value="20" min="4" max="100" step="2" style="width: 60px;">
+            <label>📝 Soru Sayısı:</label>
+            <input type="number" id="questionCount" value="20" min="4" max="100" style="width: 60px;">
         </div>
-        <br>
-        <button class="btn-generate" onclick="calismaYapragiUret()">🔄 Soruları Yeniden Üret</button>
-        <button class="btn-print" onclick="window.print()">🖨️ Yazdır / PDF Olarak Kaydet</button>
-        <a href="index.html" class="btn-home"><button type="button" style="background: #64748b; margin: 0; color: white; cursor: pointer;">🏠 Ana Sayfaya Dön</button></a>
+        <button onclick="calismaYapragiUret()" style="background: #3b82f6; color: white;">🔄 Yenile</button>
+        <button onclick="window.print()" style="background: #22c55e; color: white; margin-left: 10px;">🖨️ Yazdır / PDF</button>
+        <a href="index.html" style="text-decoration: none;"><button type="button" style="background: #64748b; color: white; margin-left: 10px; cursor: pointer;">🏠 Ana Sayfa</button></a>
     </div>
 
-    <!-- ÇALIŞMA YAPRAĞI -->
     <div id="worksheet">
         <div class="worksheet-header"><h2>CEBİRSEL İFADELER VE DENKLEMLER ÇALIŞMA YAPRAĞI</h2></div>
         <div class="student-info">
@@ -87,105 +63,74 @@
         <div class="questions-grid" id="questionsContainer"></div>
     </div>
 
-    <!-- CEVAP ANAHTARI -->
     <div class="answer-key-section">
         <div class="worksheet-header" style="border-bottom: 2px solid #333;"><h2>🔑 CEVAP ANAHTARI</h2></div>
         <div class="answer-grid" id="answersContainer"></div>
     </div>
 
-    <!-- İKİNCİ PARÇA ALTTTAKİ SCRIPT ETİKETİNİN İÇİNE GELECEK -->
     <script>
-        function rastgeleSayi(min, max) {
-            let sayi = Math.floor(Math.random() * (max - min + 1)) + min;
-            return sayi === 0 ? rastgeleSayi(min, max) : sayi;
+        function rSayi(min, max) {
+            let s = Math.floor(Math.random() * (max - min + 1)) + min;
+            return s === 0 ? rSayi(min, max) : s;
         }
 
-        function terimBirlestir(katsayi, degisken) {
-            if (katsayi === 1) return `<span class="variable">${degisken}</span>`;
-            if (katsayi === -1) return `-${katsayi.toString().replace("-", "")}<span class="variable">${degisken}</span>`;
-            return `${katsayi}<span class="variable">${degisken}</span>`;
+        function tYaz(katsayi, degisken) {
+            if (katsayi === 1) return `<span class="var">${degisken}</span>`;
+            if (katsayi === -1) return `-${degisken}`;
+            return `${katsayi}<span class="var">${degisken}</span>`;
         }
 
-        function sabitYaz(sayi, baslangicMi = false) {
-            if (sayi >= 0) {
-                return baslangicMi ? `${sayi}` : `+ ${sayi}`;
-            } else {
-                return `- ${Math.abs(sayi)}`;
-            }
+        function sYaz(sayi) {
+            return sayi >= 0 ? `+ ${sayi}` : `- ${Math.abs(sayi)}`;
         }
 
         function calismaYapragiUret() {
-            const qContainer = document.getElementById("questionsContainer");
-            const aContainer = document.getElementById("answersContainer");
-            const count = parseInt(document.getElementById("questionCount").value);
+            const qc = document.getElementById("questionsContainer");
+            const ac = document.getElementById("answersContainer");
+            const count = parseInt(document.getElementById("questionCount").value) || 20;
             const topic = document.getElementById("topicSelect").value;
-            const difficulty = document.getElementById("difficultySelect").value;
+            const diff = document.getElementById("difficultySelect").value;
             
-            qContainer.innerHTML = "";
-            aContainer.innerHTML = "";
-
+            qc.innerHTML = ""; ac.innerHTML = "";
             const tipler = ['ax+b=c', 'ax-b=c', 'ax+b=cx+d'];
 
             for (let i = 1; i <= count; i++) {
-                let tip = topic === "karisik" ? tipler[Math.floor(Math.random() * tipler.length)] : topic;
-                let a, b, c, d, x;
-                let soruMetni = "";
-                let cevapMetni = "";
+                let tip = topic === "karisik" ? tipler[Math.floor(Math.random() * 3)] : topic;
+                let a, b, c, d, x, sMetni = "", cMetni = "";
 
-                if (difficulty === "kolay") {
-                    x = Math.floor(Math.random() * 8) + 1; 
-                    a = Math.floor(Math.random() * 5) + 2; 
-                    b = Math.floor(Math.random() * 10) + 1; 
-                } else if (difficulty === "orta") {
-                    x = rastgeleSayi(-10, 10);
-                    a = rastgeleSayi(-6, 6);
-                    b = rastgeleSayi(-15, 15);
-                } else { 
-                    x = rastgeleSayi(-20, 20);
-                    a = rastgeleSayi(-12, 12);
-                    b = rastgeleSayi(-30, 30);
+                if (diff === "kolay") {
+                    x = Math.floor(Math.random() * 8) + 1; a = Math.floor(Math.random() * 4) + 2; b = Math.floor(Math.random() * 8) + 1;
+                } else if (diff === "orta") {
+                    x = rSayi(-9, 9); a = rSayi(-5, 5); b = rSayi(-12, 12);
+                } else {
+                    x = rSayi(-15, 15); a = rSayi(-10, 10); b = rSayi(-25, 25);
                 }
 
                 if (tip === 'ax+b=c') {
                     c = (a * x) + b;
-                    soruMetni = `${terimBirlestir(a, 'x')} ${sabitYaz(b)} = ${c}`;
-                    cevapMetni = `<span class="variable">x</span> = ${x}`;
-                } 
-                else if (tip === 'ax-b=c') {
-                    b = Math.abs(b);
-                    c = (a * x) - b;
-                    soruMetni = `${terimBirlestir(a, 'x')} - ${b} = ${c}`;
-                    cevapMetni = `<span class="variable">x</span> = ${x}`;
-                } 
-                else if (tip === 'ax+b=cx+d') {
-                    if (difficulty === "kolay") {
-                        c = a + (Math.floor(Math.random() * 3) + 1);
-                        d = (a * x + b) - (c * x);
-                    } else {
-                        c = rastgeleSayi(-6, 6);
-                        while (c === a) { c = rastgeleSayi(-6, 6); }
-                        d = (a * x + b) - (c * x);
-                    }
-                    soruMetni = `${terimBirlestir(a, 'x')} ${sabitYaz(b)} = ${terimBirlestir(c, 'x')} ${sabitYaz(d)}`;
-                    cevapMetni = `<span class="variable">x</span> = ${x}`;
+                    sMetni = `${tYaz(a, 'x')} ${sYaz(b)} = ${c}`;
+                } else if (tip === 'ax-b=c') {
+                    b = Math.abs(b); c = (a * x) - b;
+                    sMetni = `${tYaz(a, 'x')} - ${b} = ${c}`;
+                } else if (tip === 'ax+b=cx+d') {
+                    c = (diff === "kolay") ? a + 2 : rSayi(-5, 5);
+                    while (c === a) { c = rSayi(-5, 5); }
+                    d = (a * x + b) - (c * x);
+                    sMetni = `${tYaz(a, 'x')} ${sYaz(b)} = ${tYaz(c, 'x')} ${sYaz(d)}`;
                 }
 
-                qContainer.innerHTML += `
-                    <div class="question-item">
-                        <strong>${i})</strong> Aşağıdaki denklemi çözünüz.
-                        <div class="math-equation">${soruMetni}</div>
-                        <div class="space-for-solution"></div>
-                    </div>
-                `;
+                cMetni = `<span class="var">x</span> = ${x}`;
 
-                aContainer.innerHTML += `
-                    <div class="answer-item">
-                        <strong style="margin-right:8px;">S${i}:</strong> ${cevapMetni}
-                    </div>
-                `;
+                qc.innerHTML += `
+                    <div class="question-item">
+                        <strong>${i})</strong> Denklemi çözünüz.
+                        <div class="math-eq">${sMetni}</div>
+                        <div class="space"></div>
+                    </div>`;
+
+                ac.innerHTML += `<div class="answer-item"><strong>S${i}:</strong> ${cMetni}</div>`;
             }
         }
-
         window.onload = calismaYapragiUret;
     </script>
 </body>
