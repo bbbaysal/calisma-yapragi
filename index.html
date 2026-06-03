@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematik Öğretmeni - Çalışma Yaprağı Portalı</title>
+    <style>
+        /* Genel Tasarım */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f1f5f9;
+            color: #1e293b;
+        }
+
+        /* Kahraman Başlık Alanı (Hero Section) */
+        .hero {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            text-align: center;
+            padding: 60px 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .hero p {
+            margin: 10px 0 0 0;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* İçerik Konteyneri */
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* Kart Tablosu (Grid Layout) */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        /* Konu Kartları */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-top: 5px solid #3b82f6;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            font-size: 1.4rem;
+            color: #1e3a8a;
+        }
+
+        .card p {
+            color: #64748b;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        /* Gitme Butonu */
+        .btn {
+            display: inline-block;
+            text-align: center;
+            background-color: #2563eb;
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        /* İleride Eklenecek Pasif Kartlar İçin Stil */
+        .card.passive {
+            border-top-color: #cbd5e1;
+            opacity: 0.7;
+        }
+        
+        .card.passive .btn {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Başlık Alanı -->
+    <div class="hero">
+        <h1>📐 Dinamik Matematik Çalışma Yaprakları</h1>
+        <p>Öğrencileriniz için anında sonsuz çeşitlilikte testler ve PDF'ler üretin.</p>
+    </div>
+
+    <!-- Kartlar Listesi -->
+    <div class="container">
+        <div class="grid">
+            
+            <!-- 1. KART: TAM SAYILAR (Şu an Aktif Olan) -->
+            <div class="card">
+                <div>
+                    <h3>➕ Tam Sayılarda İşlemler</h3>
+                    <p>Negatif ve pozitif tam sayılarla toplama, çıkarma, çarpma ve kalansız bölme işlemlerini içeren dinamik çalışma yaprağı.</p>
+                </div>
+                <!-- tamsayilar.html sayfasına yönlendirir -->
+                <a href="tamsayilar.html" class="btn">Sihirbazı Aç →</a>
+            </div>
+
+            <!-- 2. KART: KESİRLER (Gelecekte Eklenecek) -->
+            <div class="card passive">
+                <div>
+                    <h3>🍕 Kesirli Sayılar (Çok Yakında)</h3>
+                    <p>Rasyonel sayılarda payda eşitleme, sadeleştirme ve dört işlem adımlarını barındıran çalışma kağıdı üretici.</p>
+                </div>
+                <a href="#" class="btn" onclick="alert('Bu konu yakında eklenecektir!'); return false;">Hazırlanıyor...</a>
+            </div>
+
+            <!-- 3. KART: CEBİRSEL İFADELER (Gelecekte Eklenecek) -->
+            <div class="card passive">
+                <div>
+                    <h3>✖️ Cebirsel İfadeler (Çok Yakında)</h3>
+                    <p>Sayı örüntüleri, değişkenler, bilinmeyenler ve birinci dereceden bir bilinmeyenli denklemler için alıştırma hazırlayıcı.</p>
+                </div>
+                <a href="#" class="btn" onclick="alert('Bu konu yakında eklenecektir!'); return false;">Hazırlanıyor...</a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Alt Bilgi -->
+    <footer>
+        <p>© 2026 Matematik Öğretmeni Çalışma Yaprağı Portalı. Tüm hakları öğretmenlerimize ve öğrencilerimize aittir. ❤️</p>
+    </footer>
+
+</body>
+</html>

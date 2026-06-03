@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dinamik Matematik Çalışma Yaprağı Üretici Pro</title>
+    <style>
+        /* Genel Arayüz Tasarımı */
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 30px; color: #333; line-height: 1.5; }
+        
+        /* Öğretmen Kontrol Paneli */
+        .no-print { 
+            background: #f8f9fa; padding: 20px; border: 1px solid #e2e8f0; 
+            border-radius: 10px; margin-bottom: 30px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .control-group { display: inline-block; margin-right: 20px; margin-bottom: 10px; }
+        .control-group label { font-weight: bold; display: block; margin-bottom: 5px; font-size: 14px; }
+        select, input { padding: 8px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 14px; }
+        button { 
+            padding: 10px 20px; font-size: 14px; font-weight: bold; cursor: pointer; 
+            border: none; border-radius: 5px; transition: background 0.2s; margin-top: 15px;
+        }
+        .btn-generate { background: #3b82f6; color: white; }
+        .btn-generate:hover { background: #2563eb; }
+        .btn-print { background: #22c55e; color: white; margin-left: 10px; }
+        .btn-print:hover { background: #16a34a; }
+        
+        /* Çalışma Yaprağı Tasarımı */
+        .worksheet-header { text-align: center; margin-bottom: 30px; border-bottom: 3px double #333; padding-bottom: 15px; }
+        .student-info { display: flex; justify-content: space-between; margin-bottom: 30px; font-weight: bold; font-size: 15px; }
+        .questions-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px 60px; }
+        .question-item { font-size: 18px; padding: 12px 5px; border-bottom: 1px dashed #cbd5e1; page-break-inside: avoid; }
+        
+        /* Cevap Anahtarı Tasarımı */
+        .answer-key-section { page-break-before: always; margin-top: 50px; padding-top: 20px; }
+        .answer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 20px; }
+        .answer-item { font-size: 16px; padding: 8px; background: #f1f5f9; border-radius: 4px; border-left: 4px solid #3b82f6; }
+
+        /* 🖨️ YAZDIRMA AYARLARI */
+        @media print {
+            .no-print { display: none !important; }
+            body { margin: 0; padding: 0; }
+            .answer-item { background: none !important; border: 1px solid #cbd5e1; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ÖĞRETMEN PANELİ (Yazdırırken Gizlenir) -->
+    <div class="no-print">
+        <h2>🛠️ Çalışma Yaprağı Geliştirme Paneli</h2>
+        
+        <div class="control-group">
+            <label for="topicSelect">🎯 Konu Seçimi:</label>
+            <select id="topicSelect" onchange="calismaYapragiUret()">
+                <option value="karisik">Tam Sayılarda Dört İşlem (Karışık)</option>
+                <option value="+">Sadece Toplama</option>
+                <option value="-">Sadece Çıkarma</option>
+                <option value="×">Sadece Çarpma</option>
+                <option value="÷">Sadece Bölme</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="difficultySelect">⚡ Zorluk Seviyesi:</label>
+            <select id="difficultySelect" onchange="calismaYapragiUret()">
+                <option value="kolay">Kolay (Tek basamaklı ve ağırlıklı pozitif)</option>
+                <option value="orta" selected>Orta (-20 ile +20 arası tam sayılar)</option>
+                <option value="zor">Zor (-100 ile +100 arası büyük sayılar)</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="questionCount">📝 Soru Sayısı:</label>
+            <input type="number" id="questionCount" value="20" min="4" max="100" step="2" style="width: 60px;">
+        </div>
+
+        <br>
+        <button class="btn-generate" onclick="calismaYapragiUret()">🔄 Soruları Yeniden Üret</button>
+        <button class="btn-print" onclick="window.print()">🖨️ Yazdır / PDF Kaydet</button>
+    </div>
+
+    <!-- ÖĞRENCİ ÇALIŞMA YAPRAĞI ALANI -->
+    <div id="worksheet">
+        <div class="worksheet-header">
+            <h2 id="worksheetTitle">TAM SAYILARDA DÖRT İŞLEM ÇALIŞMA YAPRAĞI</h2>
+        </div>
+        
+        <div class="student-info">
+            <div>Adı Soyadı: ...................................................</div>
+            <div>Sınıfı / No: ....................</div>
+            <div>Tarih: .... / .... / 20...</div>
+        </div>
+
+        <!-- Sorular buraya enjekte edilecek -->
+        <div class="questions-grid" id="questionsContainer"></div>
+    </div>
+
+    <!-- CEVAP ANAHTARI ALANI (Yazdırma esnasında otomatik yeni sayfaya geçer) -->
+    <div class="answer-key-section">
+        <div class="worksheet-header" style="border-bottom: 2px solid #333;">
+            <h2>🔑 CEVAP ANAHTARI</h2>
+        </div>
+        <!-- Cevaplar buraya enjekte edilecek -->
+        <div class="answer-grid" id="answersContainer"></div>
+    </div>
+
+    <script>
+        function rastgeleSayi(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // Bölme işleminde kalansız ve sıfırsız tam sayı üretimi
+        function uygunBolmeUret(min, max) {
+            let bolen = rastgeleSayi(min, max);
+            while (bolen === 0 || bolen === 1 || bolen === -1) { 
+                bolen = rastgeleSayi(min, max); 
+            }
+            let bolum = rastgeleSayi(min, max);
+            while (bolum === 0) { bolum = rastgeleSayi(min, max); }
+            
+            let bolunen = bolen * bolum;
+            return { sayi1: bolunen, sayi2: bolen, sonuc: bolum };
+        }
+
+        function calismaYapragiUret() {
+            const qContainer = document.getElementById("questionsContainer");
+            const aContainer = document.getElementById("answersContainer");
+            const count = parseInt(document.getElementById("questionCount").value);
+            const topic = document.getElementById("topicSelect").value;
+            const difficulty = document.getElementById("difficultySelect").value;
+            
+            // Başlığı konuya göre güncelleme
+            const titleElement = document.getElementById("worksheetTitle");
+            titleElement.innerText = topic === 'karisik' ? "TAM SAYILARDA DÖRT İŞLEM ÇALIŞMA YAPRAĞI" : `TAM SAYILARDA ${document.getElementById("topicSelect").options[document.getElementById("topicSelect").selectedIndex].text.toUpperCase()}`;
+
+            qContainer.innerHTML = "";
+            aContainer.innerHTML = "";
+
+            // Zorluk seviyesine göre sayı aralıkları belirleme
+            let min, max;
+            if (difficulty === "kolay") { min = 1; max = 9; } 
+            else if (difficulty === "orta") { min = -20; max = 20; } 
+            else { min = -100; max = 100; }
+
+            const islemler = ['+', '-', '×', '÷'];
+
+            for (let i = 1; i <= count; i++) {
+                let islem = topic === "karisik" ? islemler[Math.floor(Math.random() * islemler.length)] : topic;
+                let s1, s2, sonuc;
+
+                // Zorluk seviyesi 'kolay' ise ama çıkarma/toplama geldiyse negatif çıkmaması için ufak güvenlikler (isteğe bağlı)
+                if (islem === '÷') {
+                    // Kolay modda bölme aralığını daraltalım ki devasa sayılar çıkmasın
+                    let bMin = difficulty === "kolay" ? 2 : (difficulty === "orta" ? -10 : -25);
+                    let bMax = difficulty === "kolay" ? 8 : (difficulty === "orta" ? 10 : 25);
+                    let bolme = uygunBolmeUret(bMin, bMax);
+                    s1 = bolme.sayi1;
+                    s2 = bolme.sayi2;
+                    sonuc = bolme.sonuc;
+                } else {
+                    s1 = rastgeleSayi(min, max);
+                    s2 = rastgeleSayi(min, max);
+                    
+                    // Kolay modda negatif sonuç çıkmasını önleme hamlesi
+                    if(difficulty === "kolay" && islem === '-' && s1 < s2) {
+                        let temp = s1; s1 = s2; s2 = temp;
+                    }
+
+                    if (islem === '+') sonuc = s1 + s2;
+                    if (islem === '-') sonuc = s1 - s2;
+                    if (islem === '×') sonuc = s1 * s2;
+                }
+
+                // Matematiksel yazım kuralları (Negatif sayıları paranteze alma)
+                let s1Yazi = (s1 < 0) ? `(${s1})` : `${s1}`;
+                let s2Yazi = (s2 < 0 && islem !== ' ') ? `(${s2})` : `${s2}`;
+                
+                // İlk sayı negatifse ve işlemin başındaysa bazen parantezsiz de yazılabilir, 
+                // ancak ikinci sayı işlemden sonra geliyorsa kesinlikle parantezli olmalıdır.
+
+                // Soru şablonunu HTML olarak ekle
+                qContainer.innerHTML += `
+                    <div class="question-item">
+                        <strong>${i})</strong> ${s1Yazi} ${islem} ${s2Yazi} = 
+                    </div>
+                `;
+
+                // Cevap anahtarı şablonunu HTML olarak ekle
+                aContainer.innerHTML += `
+                    <div class="answer-item">
+                        <strong>Soru ${i}:</strong> ${sonuc}
+                    </div>
+                `;
+            }
+        }
+
+        // Sayfa ilk yüklendiğinde çalıştır
+        window.onload = calismaYapragiUret;
+    </script>
+</body>
+</html>
